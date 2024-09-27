@@ -2,6 +2,11 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.2'
 	id 'io.spring.dependency-management' version '1.1.6'
+	id 'application'
+}
+
+application {
+	mainClass = 'com.Instagram.Dummy.DummyApplication'  // Update this with your actual main class
 }
 
 group = 'com.Instagram'
@@ -27,8 +32,8 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.projectreactor:reactor-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
 	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-oauth2-client
-	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-client', version: '3.3.2'
 
 }
 
