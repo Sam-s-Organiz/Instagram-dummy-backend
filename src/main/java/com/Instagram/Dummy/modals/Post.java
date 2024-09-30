@@ -1,11 +1,19 @@
 package com.Instagram.Dummy.modals;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.util.Set;
 
 @Entity
 @Table(name = "posts")
+@Getter
+@Setter
+@NoArgsConstructor // Remove this if you have a constructor defined
+@ToString
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,10 +29,11 @@ public class Post {
     private String caption;
 
     @OneToMany(mappedBy = "post")
+    @ToString.Exclude
     private Set<Comment> comments;
 
     @OneToMany(mappedBy = "post")
+    @ToString.Exclude
     private Set<Like> likes;
 
-    // Getters and Setters
 }
