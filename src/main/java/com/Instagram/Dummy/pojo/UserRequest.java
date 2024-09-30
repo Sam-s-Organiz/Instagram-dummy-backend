@@ -1,13 +1,12 @@
 package com.Instagram.Dummy.pojo;
 
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public class UserRequest {
 
-    @NotBlank
+    // Username is now optional
     @Size(min = 3, max = 20)
     private String username;
 
@@ -18,7 +17,6 @@ public class UserRequest {
     @NotBlank
     private String password;
 
-    private String profilePicture;
     private String bio;
 
     public String getUsername() {
@@ -45,14 +43,6 @@ public class UserRequest {
         this.password = password;
     }
 
-    public String getProfilePicture() {
-        return profilePicture;
-    }
-
-    public void setProfilePicture(String profilePicture) {
-        this.profilePicture = profilePicture;
-    }
-
     public String getBio() {
         return bio;
     }
@@ -66,7 +56,6 @@ public class UserRequest {
         return "UserRequest{" +
                 "username='" + username + '\'' +
                 ", email='" + email + '\'' +
-                ", profilePicture='" + profilePicture + '\'' +
                 ", bio='" + bio + '\'' +
                 '}'; // Exclude password for security
     }
