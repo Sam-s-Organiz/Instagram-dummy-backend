@@ -1,6 +1,7 @@
 package com.Instagram.Dummy.services;
 
 import com.Instagram.Dummy.modals.User;
+import com.Instagram.Dummy.pojo.UserDto;
 import com.Instagram.Dummy.pojo.UserRequest;
 import com.Instagram.Dummy.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,19 @@ public class UserService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
+
+    public UserDto getUserById(Long userId) {
+        User user = findUserByIdOrThrow(userId);
+
+        UserDto userDTO = new UserDto();
+        userDTO.setId(user.getId());
+        userDTO.setUsername(user.getUsername());
+        userDTO.setEmail(user.getEmail());
+        userDTO.setProfilePicture(user.getProfilePicture());
+        userDTO.setBio(user.getBio());
+        return userDTO;
+    }
+
 
     public ResponseEntity<User> createUser(UserRequest userRequest) {
         System.out.println("Register UserRequest :" + userRequest);

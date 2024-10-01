@@ -4,6 +4,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import java.util.Set;
 
 @Entity
@@ -22,6 +26,7 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @JsonIgnore // Ignore password in JSON response
     @Column(nullable = false)
     private String password;
 
@@ -30,26 +35,14 @@ public class User {
     private String bio;
 
     @OneToMany(mappedBy = "user")
-    @ToString.Exclude
+    @JsonManagedReference // Manage the relationship to avoid recursion
     private Set<Post> posts;
 
-    @OneToMany(mappedBy = "sender")
-    @ToString.Exclude
-    private Set<DirectMessage> sentMessages;
-
-    @OneToMany(mappedBy = "receiver")
-    @ToString.Exclude
-    private Set<DirectMessage> receivedMessages;
-
     @OneToMany(mappedBy = "follower")
-    @ToString.Exclude
+    @JsonBackReference // Prevent recursive serialization
     private Set<Follow> following;
 
     @OneToMany(mappedBy = "following")
-    @ToString.Exclude
+    @JsonBackReference
     private Set<Follow> followers;
-
-    @OneToMany(mappedBy = "user")
-    @ToString.Exclude
-    private Set<Comment> comments; // Add this line for comments
 }

@@ -1,6 +1,7 @@
 package com.Instagram.Dummy.controllers;
 
 import com.Instagram.Dummy.modals.User;
+import com.Instagram.Dummy.pojo.UserDto;
 import com.Instagram.Dummy.pojo.UserRequest;
 import com.Instagram.Dummy.services.UserService;
 import org.slf4j.Logger;
@@ -44,5 +45,10 @@ public class UserController {
         User user = userService.findUserByIdOrThrow(id);
         return ResponseEntity.ok(user);
     }
+
+//    @GetMapping("/{id}")
+//    public UserDto getUserUsingId(@PathVariable Long id) {
+//        return userService.getUserById(id);
+//    }
 
 }
