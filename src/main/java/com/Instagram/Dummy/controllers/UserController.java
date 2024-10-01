@@ -26,7 +26,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<User> signIn(@RequestBody UserRequest userRequest) {
+    public UserDto signIn(@RequestBody UserRequest userRequest) {
         logger.info("SignIn request received: {}", userRequest);
         return userService.login(userRequest);
     }

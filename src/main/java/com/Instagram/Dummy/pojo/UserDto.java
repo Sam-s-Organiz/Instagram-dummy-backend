@@ -13,4 +13,5 @@ public class UserDto {
     private String email;
     private String profilePicture;
     private String bio;
+    private  String jtwToken;
 }
