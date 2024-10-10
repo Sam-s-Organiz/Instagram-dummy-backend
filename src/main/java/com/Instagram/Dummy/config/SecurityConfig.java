@@ -59,7 +59,7 @@ public class SecurityConfig {
         return email -> {
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-            return new MyUserDetails(user); // Return your custom UserDetails
+            return new JwtUserDetails(user); // Return your custom UserDetails
         };
     }
 

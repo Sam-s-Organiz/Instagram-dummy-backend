@@ -1,67 +1,68 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.3.2'
-	id 'io.spring.dependency-management' version '1.1.6'
-	id 'application'
+    id 'java'
+    id 'org.springframework.boot' version '3.3.2'
+    id 'io.spring.dependency-management' version '1.1.6'
+    id 'application'
 }
 
 application {
-	mainClass = 'com.Instagram.Dummy.DummyApplication'  // Update this with your actual main class
+    mainClass = 'com.Instagram.Dummy.DummyApplication'  // Update this with your actual main class
 }
 
 group = 'com.Instagram'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'org.springframework.session:spring-session-jdbc'
-	implementation 'mysql:mysql-connector-java:8.0.30' // or latest version
-	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api
-	implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.12.5'
-	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-impl
-	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.12.5'
-	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-jackson
-	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.12.5'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.session:spring-session-jdbc'
+    implementation 'mysql:mysql-connector-java:8.0.30' // or latest version
+    // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api
+    implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.12.5'
+    // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-impl
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.12.5'
+    // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-jackson
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.12.5'
 
 
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.projectreactor:reactor-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.springframework.security:spring-security-test'
+    // https://mvnrepository.com/artifact/org.projectlombok/lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'io.projectreactor:reactor-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	testImplementation 'org.springframework.security:spring-security-test'
-	// https://mvnrepository.com/artifact/org.projectlombok/lombok
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
+// https://mvnrepository.com/artifact/org.springframework.kafka/spring-kafka
+    implementation group: 'org.springframework.kafka', name: 'spring-kafka', version: '3.2.4'
 
-
-	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-oauth2-client
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-oauth2-client
 
 }
 
 ext {
-	lombokVersion = "1.18.32"
-	mapstructVersion = "1.3.1.Final"
-	springCloudVersion = "2023.0.2" // Spring Cloud
-	springCloudServicesVersion = "3.3.0"
-	azureAppInsightsVersion = "3.5.3"
-	sourceJdkVersion = JavaVersion.VERSION_17
-	targetJdkVersion = JavaVersion.VERSION_17
+    lombokVersion = "1.18.32"
+    mapstructVersion = "1.3.1.Final"
+    springCloudVersion = "2023.0.2" // Spring Cloud
+    springCloudServicesVersion = "3.3.0"
+    azureAppInsightsVersion = "3.5.3"
+    sourceJdkVersion = JavaVersion.VERSION_17
+    targetJdkVersion = JavaVersion.VERSION_17
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
