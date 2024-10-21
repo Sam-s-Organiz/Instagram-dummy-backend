@@ -46,8 +46,6 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-// https://mvnrepository.com/artifact/org.springframework.kafka/spring-kafka
-    implementation group: 'org.springframework.kafka', name: 'spring-kafka', version: '3.2.4'
 
     // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-oauth2-client
 

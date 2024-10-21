@@ -7,7 +7,6 @@ import com.Instagram.Dummy.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,10 +25,6 @@ public class UserService {
     private AuthenticationManager authenticationManager;
     @Autowired
     private JWTservice jwTservice;
-
-    @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
-
 
     private User findUserByEmailOrThrow(String email) {
         return userRepository.findByEmail(email)
@@ -63,8 +58,6 @@ public class UserService {
         user.setBio(userRequest.getBio());
 
         User savedUser = userRepository.save(user);
-        kafkaTemplate.send("dymmyInsta", "User " + userRequest.getEmail() + " has created account");
-
         return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
 
@@ -80,7 +73,6 @@ public class UserService {
             userDto.setProfilePicture(user.getProfilePicture());
             userDto.setBio(user.getBio());
             userDto.setJtwToken(jwTservice.generateToken(userRequest.getEmail()));
-            kafkaTemplate.send("dymmyInsta", "User " + userRequest.getEmail() + " has logged in");
             return userDto;
 
         }
