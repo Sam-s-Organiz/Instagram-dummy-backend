@@ -1,5 +1,6 @@
 package com.Instagram.Dummy.modals;
 
+import com.Instagram.Dummy.pojo.UserDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -41,10 +41,10 @@ public class UserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
-    public UserDto getUserById(Long userId) {
+    public User getUserById(Long userId) {
         User user = findUserByIdOrThrow(userId);
 
-        UserDto userDTO = new UserDto();
+        User userDTO = new User();
         userDTO.setId(user.getId());
         userDTO.setUsername(user.getUsername());
         userDTO.setEmail(user.getEmail());
@@ -69,11 +69,16 @@ public class UserService {
     }
 
     public UserDto login(UserRequest userRequest) {
-        //        User user = findUserByEmailOrThrow(userRequest.getEmail());
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userRequest.getEmail(), userRequest.getPassword()));
         // Check if the password matches
         if (authentication.isAuthenticated()) {
+            User user = findUserByEmailOrThrow(userRequest.getEmail());
             UserDto userDto = new UserDto();
+            userDto.setId(user.getId());
+            userDto.setUsername(user.getUsername());
+            userDto.setEmail(user.getEmail());
+            userDto.setProfilePicture(user.getProfilePicture());
+            userDto.setBio(user.getBio());
             userDto.setJtwToken(jwTservice.generateToken(userRequest.getEmail()));
             kafkaTemplate.send("dymmyInsta", "User " + userRequest.getEmail() + " has logged in");
             return userDto;
