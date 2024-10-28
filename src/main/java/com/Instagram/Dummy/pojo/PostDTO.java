@@ -1,14 +1,12 @@
 package com.Instagram.Dummy.pojo;
 
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
-@Getter
-@Setter
-@NoArgsConstructor // Remove this if you have a constructor defined
-@ToString
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class PostDTO {
     private Long id;
     private Long userId;
@@ -16,5 +14,5 @@ public class PostDTO {
     private String caption;
     private String imageUrl;
 
-    // Getters and Setters
 }
+

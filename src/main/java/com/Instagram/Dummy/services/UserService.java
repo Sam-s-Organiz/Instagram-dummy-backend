@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
 
@@ -36,16 +38,19 @@ public class UserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
-    public User getUserById(Long userId) {
-        User user = findUserByIdOrThrow(userId);
-
-        User userDTO = new User();
-        userDTO.setId(user.getId());
-        userDTO.setUsername(user.getUsername());
-        userDTO.setEmail(user.getEmail());
-        userDTO.setProfilePicture(user.getProfilePicture());
-        userDTO.setBio(user.getBio());
-        return userDTO;
+//    public User getUserById(Long userId) {
+//        User user = findUserByIdOrThrow(userId);
+//
+//        User userDTO = new User();
+//        userDTO.setId(user.getId());
+//        userDTO.setUsername(user.getUsername());
+//        userDTO.setEmail(user.getEmail());
+//        userDTO.setProfilePicture(user.getProfilePicture());
+//        userDTO.setBio(user.getBio());
+//        return userDTO;
+//    }
+    public Optional<User> getUserById(Long userId) {
+        return userRepository.findById(userId);
     }
 
 
@@ -91,5 +96,6 @@ public class UserService {
         userRepository.save(user);
         return new ResponseEntity<>("Profile picture updated successfully", HttpStatus.OK);
     }
+
 
 }

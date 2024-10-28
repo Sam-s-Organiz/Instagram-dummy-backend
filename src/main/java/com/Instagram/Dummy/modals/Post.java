@@ -1,6 +1,5 @@
 package com.Instagram.Dummy.modals;
 
-import com.Instagram.Dummy.pojo.UserDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +12,7 @@ import java.util.Set;
 @Table(name = "posts")
 @Getter
 @Setter
-@NoArgsConstructor // Remove this if you have a constructor defined
+@NoArgsConstructor
 @ToString
 public class Post {
     @Id
@@ -29,12 +28,20 @@ public class Post {
 
     private String caption;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private Set<Comment> comments;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private Set<Like> likes;
+
+    @Column(nullable = false)
+    private String sourceType;
+
+    @Lob // This annotation is used for large objects.
+    private byte[] imageData; // or similar field to store image data
+
+
 
 }
