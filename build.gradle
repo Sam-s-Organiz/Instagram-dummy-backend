@@ -47,6 +47,10 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
 
 
+    // https://mvnrepository.com/artifact/org.springframework/spring-webflux
+    implementation 'org.springframework:spring-webflux:6.1.14'
+
+
     // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-oauth2-client
 
 }
