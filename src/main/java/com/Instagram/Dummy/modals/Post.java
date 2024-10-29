@@ -39,8 +39,10 @@ public class Post {
     @Column(nullable = false)
     private String sourceType;
 
-    @Lob // This annotation is used for large objects.
-    private byte[] imageData; // or similar field to store image data
+    @Lob
+    @Column(name = "file_data", columnDefinition = "LONGBLOB")
+    private byte[] fileData;
+
 
 
 

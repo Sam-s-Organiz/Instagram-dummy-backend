@@ -9,10 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -33,7 +31,7 @@ public class PostController {
     @PostMapping("/upload/{userId}")
     public ResponseEntity<String> uploadPost(
             @PathVariable Long userId,
-            @RequestParam(required = false) MultipartFile file, // Use MultipartFile here
+            @RequestParam(required = false) MultipartFile file,
             @RequestParam(required = false) String imageUrl,
             @RequestParam(required = false) String caption) {
 
@@ -41,23 +39,27 @@ public class PostController {
             User user = userService.getUserById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            // Call the service to create the post
+            // Check that either file or imageUrl is provided, but not both
+            if ((file == null || file.isEmpty()) && (imageUrl == null || imageUrl.isEmpty())) {
+                return ResponseEntity.badRequest().body("Either file or imageUrl must be provided.");
+            } else if (file != null && !file.isEmpty() && imageUrl != null && !imageUrl.isEmpty()) {
+                return ResponseEntity.badRequest().body("Provide either file or imageUrl, not both.");
+            }
+
             PostImageResponse response = postService.createPost(user, file, imageUrl, caption);
+
             return ResponseEntity.ok("Image uploaded successfully: " + response);
+
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Failed to upload image: " + e.getMessage());
         }
     }
 
 
-
-
-
-
-    // Get all posts for a specific user
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<PostDTO>> getPostsForUser(@PathVariable Long userId) {
-        List<PostDTO> posts = postService.getPostsByUser(userId);
-        return ResponseEntity.ok(posts);
+    public ResponseEntity<List<PostDTO>> getPostsByUser(@PathVariable Long userId) {
+        List<PostDTO> response = postService.getPostsByUser(userId);
+        return ResponseEntity.ok(response);
+
     }
 }

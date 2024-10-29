@@ -12,7 +12,8 @@ public class PostDTO {
     private Long userId;
     private String username;
     private String caption;
-    private String imageUrl;
+    private String imageUrl; // For URL type images
+    private byte[] fileData; // For file type images
 
 }
 
