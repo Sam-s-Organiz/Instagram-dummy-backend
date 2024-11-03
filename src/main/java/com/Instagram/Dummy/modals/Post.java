@@ -12,7 +12,7 @@ import java.util.Set;
 @Table(name = "posts")
 @Getter
 @Setter
-@NoArgsConstructor // Remove this if you have a constructor defined
+@NoArgsConstructor
 @ToString
 public class Post {
     @Id
@@ -28,12 +28,27 @@ public class Post {
 
     private String caption;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private Set<Comment> comments;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private Set<Like> likes;
+
+    @Column(nullable = false)
+    private String sourceType;
+
+    @Lob
+    @Column(name = "file_data", columnDefinition = "LONGBLOB")
+    private byte[] fileData;
+
+    public int getLikesCount() {
+        return likes != null ? likes.size() : 0;
+    }
+
+
+
+
 
 }

@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/user")
 @CrossOrigin(origins = "*")
@@ -25,9 +27,10 @@ public class FollowUserController {
         return ResponseEntity.ok("User followed successfully");
     }
 
-    @GetMapping("/feeds/{userId}")
-    public ResponseEntity<?> getUserFeeds(@PathVariable Long userId) {
-        logger.info("Fetching feed for User {}", userId);
-        return ResponseEntity.ok(followService.getUserFeeds(userId));
+    @GetMapping("/follow/count/{userId}")
+    public ResponseEntity<Map<String, Integer>> getFollowCounts(@PathVariable Long userId) {
+        logger.info("Fetching follower and following count for User {}", userId);
+        Map<String, Integer> followCounts = followService.getFollowCounts(userId); // Call followService method
+        return ResponseEntity.ok(followCounts);
     }
 }

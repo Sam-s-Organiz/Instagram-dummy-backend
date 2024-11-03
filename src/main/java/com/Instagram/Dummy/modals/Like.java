@@ -1,9 +1,15 @@
 package com.Instagram.Dummy.modals;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Table(name = "likes")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class Like {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,5 +23,4 @@ public class Like {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // Getters and Setters
 }

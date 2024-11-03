@@ -7,7 +7,9 @@ import com.Instagram.Dummy.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class FollowService {
@@ -41,10 +43,14 @@ public class FollowService {
     }
 
 
-    public List<User> getUserFeeds(Long userId) {
-        // Logic to get feeds based on followed users
-        // This might involve fetching the followers of the user and then
-        // collecting posts from those users.
-        return null; // Replace with actual logic
+    public Map<String, Integer> getFollowCounts(Long userId) {
+        int followersCount = followRepository.countFollowers(userId);
+        int followingCount = followRepository.countFollowing(userId);
+
+        Map<String, Integer> followCounts = new HashMap<>();
+        followCounts.put("followersCount", followersCount);
+        followCounts.put("followingCount", followingCount);
+
+        return followCounts;
     }
 }

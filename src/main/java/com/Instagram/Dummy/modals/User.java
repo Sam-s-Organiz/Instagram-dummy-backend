@@ -1,4 +1,5 @@
 package com.Instagram.Dummy.modals;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -7,7 +8,6 @@ import lombok.ToString;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import java.util.Set;
 
 @Entity
@@ -19,7 +19,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    private String jwt;
     @Column(unique = true, nullable = false)
     private String username;
 
@@ -35,14 +35,17 @@ public class User {
     private String bio;
 
     @OneToMany(mappedBy = "user")
-    @JsonManagedReference // Manage the relationship to avoid recursion
+    @JsonManagedReference
+    @ToString.Exclude
     private Set<Post> posts;
 
     @OneToMany(mappedBy = "follower")
-    @JsonBackReference // Prevent recursive serialization
+    @JsonBackReference
+    @ToString.Exclude // Prevent recursive serialization
     private Set<Follow> following;
 
     @OneToMany(mappedBy = "following")
     @JsonBackReference
+    @ToString.Exclude
     private Set<Follow> followers;
 }

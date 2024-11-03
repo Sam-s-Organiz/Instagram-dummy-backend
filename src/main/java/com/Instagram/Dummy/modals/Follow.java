@@ -10,8 +10,8 @@ import lombok.ToString;
 @Table(name = "follow")
 @Getter
 @Setter
-@NoArgsConstructor // No-args constructor for JPA
-@ToString // Optional, can exclude follower and following if necessary
+@NoArgsConstructor
+@ToString
 public class Follow {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,11 +19,11 @@ public class Follow {
 
     @ManyToOne
     @JoinColumn(name = "follower_id", nullable = false)
-    @ToString.Exclude // Exclude from toString to avoid circular references
+    @ToString.Exclude
     private User follower;
 
     @ManyToOne
     @JoinColumn(name = "following_id", nullable = false)
-    @ToString.Exclude // Exclude from toString to avoid circular references
+    @ToString.Exclude
     private User following;
 }
