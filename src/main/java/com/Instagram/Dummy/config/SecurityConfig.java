@@ -33,33 +33,23 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//
-//        return http.csrf(AbstractHttpConfigurer::disable)
-//                .authorizeHttpRequests(request -> request
-//                        .requestMatchers("/api/user/login", "/api/user/register").permitAll()
-//                        .anyRequest().authenticated())
-//                .httpBasic(Customizer.withDefaults())
-//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .build();
-        return http.csrf(AbstractHttpConfigurer::disable)
+        return http
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Ensures stateless sessions for JWT
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/user/login", "/api/user/register").permitAll()
                         .anyRequest().authenticated())
-                .addFilterBefore(jwTfilter, UsernamePasswordAuthenticationFilter.class) // Add your JWT filter
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwTfilter, UsernamePasswordAuthenticationFilter.class) // Add JWT filter
                 .build();
-
     }
-
-
 
     @Bean
     public UserDetailsService userDetailsService() {
-
         return email -> {
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-            return new JwtUserDetails(user); // Return your custom UserDetails
+            return new JwtUserDetails(user); // Ensure JwtUserDetails implements UserDetails
         };
     }
 
@@ -69,7 +59,6 @@ public class SecurityConfig {
         authProvider.setUserDetailsService(userDetailsService());
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
-
     }
 
     @Bean
@@ -77,13 +66,6 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    //    @Override
-//    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.inMemoryAuthentication()
-//                .withUser("user")
-//                .password(passwordEncoder().encode("password"))
-//                .roles("USER");
-//    }
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(12);

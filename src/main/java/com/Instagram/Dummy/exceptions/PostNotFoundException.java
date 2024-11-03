@@ -5,4 +5,3 @@ public class PostNotFoundException extends RuntimeException {
         super("Post not found with ID: " + postId);
     }
 }
-

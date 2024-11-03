@@ -43,6 +43,11 @@ public class Post {
     @Column(name = "file_data", columnDefinition = "LONGBLOB")
     private byte[] fileData;
 
+    public int getLikesCount() {
+        return likes != null ? likes.size() : 0;
+    }
+
+
 
 
 
