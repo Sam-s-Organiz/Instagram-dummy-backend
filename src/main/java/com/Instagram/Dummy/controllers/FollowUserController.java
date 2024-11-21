@@ -19,7 +19,6 @@ public class FollowUserController {
     @Autowired
     private FollowService followService;
 
-    // Endpoint to follow another user
     @PostMapping("/follow/{userId}")
     public ResponseEntity<String> followUser(@PathVariable Long userId, @RequestParam Long followerId) {
         logger.info("Follow request: User {} follows User {}", followerId, userId);

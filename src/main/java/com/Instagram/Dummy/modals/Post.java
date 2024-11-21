@@ -1,10 +1,7 @@
 package com.Instagram.Dummy.modals;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.Set;
 
@@ -12,8 +9,10 @@ import java.util.Set;
 @Table(name = "posts")
 @Getter
 @Setter
-@NoArgsConstructor
 @ToString
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,9 +45,4 @@ public class Post {
     public int getLikesCount() {
         return likes != null ? likes.size() : 0;
     }
-
-
-
-
-
 }

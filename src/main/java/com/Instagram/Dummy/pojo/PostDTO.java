@@ -1,19 +1,21 @@
 package com.Instagram.Dummy.pojo;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class PostDTO {
     private Long id;
     private Long userId;
     private String username;
     private String caption;
-    private String imageUrl; // For URL type images
-    private byte[] fileData; // For file type images
+    private String imageUrl;
+    private byte[] fileData;
 
 }
 
