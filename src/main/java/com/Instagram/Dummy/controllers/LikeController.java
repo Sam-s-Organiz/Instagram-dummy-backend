@@ -1,11 +1,16 @@
 package com.Instagram.Dummy.controllers;
 
+import com.Instagram.Dummy.exceptions.PostNotFoundException;
+import com.Instagram.Dummy.pojo.PostDTO;
 import com.Instagram.Dummy.services.LikeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/like")
@@ -19,14 +24,24 @@ public class LikeController {
 
     @PostMapping("/post/{postId}")
     public ResponseEntity<String> likeParticularPost(@PathVariable Long postId) {
-        logger.info("User is liking post with ID: {}", postId);
-         var likedPost = likeService.likePost(postId);
-
-        if (likedPost != null) {
-            return ResponseEntity.ok("Post liked successfully");
-        } else {
-            // Handle the case where the like action failed (e.g., post doesn't exist or already liked)
-            return ResponseEntity.badRequest().body("Failed to like the post");
+        logger.info("User is liking/disliking post with ID: {}", postId);
+        try {
+            String action = likeService.likeOrDislikePost(postId);
+            return ResponseEntity.ok("Post " + action + " successfully");
+        } catch (PostNotFoundException e) {
+            logger.error("Post with ID {} not found", postId, e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post not found");
+        } catch (Exception e) {
+            logger.error("An error occurred while liking the post with ID {}", postId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
         }
     }
+
+
+    @GetMapping("/allLikes")
+    public ResponseEntity<List<PostDTO>> getPosts() {
+        List<PostDTO> posts = likeService.getAllPostsWithLikes();
+        return ResponseEntity.ok(posts);
+    }
+
 }

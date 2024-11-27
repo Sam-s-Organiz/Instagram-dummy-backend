@@ -1,5 +1,7 @@
 package com.Instagram.Dummy.modals;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,6 +22,8 @@ public class Post {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
+
     private User user;
 
     @Column(nullable = false)
@@ -39,6 +43,7 @@ public class Post {
     private String sourceType;
 
     @Lob
+    @JsonIgnore
     @Column(name = "file_data", columnDefinition = "LONGBLOB")
     private byte[] fileData;
 

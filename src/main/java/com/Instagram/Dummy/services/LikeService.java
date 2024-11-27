@@ -2,10 +2,10 @@ package com.Instagram.Dummy.services;
 
 import com.Instagram.Dummy.config.JwtUserDetails;
 import com.Instagram.Dummy.exceptions.PostNotFoundException;
-import com.Instagram.Dummy.exceptions.UserAlreadyLikedPostException;
 import com.Instagram.Dummy.modals.Like;
 import com.Instagram.Dummy.modals.Post;
 import com.Instagram.Dummy.modals.User;
+import com.Instagram.Dummy.pojo.PostDTO;
 import com.Instagram.Dummy.repo.LikeRepository;
 import com.Instagram.Dummy.repo.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,39 +28,47 @@ public class LikeService {
     private LikeRepository likeRepository;
 
     @CacheEvict(value = "postsWithLikes", key = "#postId")
-    public Like likePost(Long postId) {
-        // Extract the user from the security context
+    public String likeOrDislikePost(Long postId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal(); // Cast to JwtUserDetails
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+        User user = jwtUserDetails.getUser();
 
-        // Access the User entity from JwtUserDetails
-        User user = jwtUserDetails.getUser(); // Get the User instance
-
-        // Check if the post exists
         Optional<Post> optionalPost = postRepository.findById(postId);
-        if (optionalPost.isPresent()) {
-            Post post = optionalPost.get();
-            // Check if the user has already liked this post
-            if (!likeRepository.existsByUserIdAndPostId(user.getId(), postId)) {
-                Like like = new Like();
-                like.setPost(post);
-                like.setUser(user);
-                return likeRepository.save(like);
-            } else {
-                // Handle the case where the user has already liked the post
-                throw new UserAlreadyLikedPostException("User has already liked this post.\"" + user.getId() + "  " + postId);
-            }
+        if (optionalPost.isEmpty()) {
+            throw new PostNotFoundException("Post with ID " + postId + " not found");
+        }
+
+        // Check if the like already exists
+        Optional<Like> existingLike = likeRepository.findByUserIdAndPostId(user.getId(), postId);
+
+        if (existingLike.isPresent()) {
+            // Dislike the post (delete the like)
+            likeRepository.delete(existingLike.get());
+            return "disliked";
         } else {
-            throw new PostNotFoundException(postId);
+            // Like the post
+            Like like = new Like();
+            like.setPost(optionalPost.get());
+            like.setUser(user);
+            likeRepository.save(like);
+            return "liked";
         }
     }
 
 
-    @Cacheable(value = "postsWithLikes", key = "#postId")
-    public List<Post> getAllPostsWithLikes() {
+    @Cacheable(value = "postsWithLikes", key = "#root.methodName")
+    public List<PostDTO> getAllPostsWithLikes() {
+        System.out.println("Fetching posts from the database and caching...");
         List<Post> posts = postRepository.findAll();
-        posts.forEach(post -> post.setLikes(likeRepository.findByPostId(post.getId())));
-        return posts;
+        return posts.stream()
+                .map(post -> PostDTO.builder()
+                        .id(post.getId())
+                        .userId(post.getUser().getId())
+                        .username(post.getUser().getUsername())
+                        .imageUrl(post.getImageUrl())
+                        .caption(post.getCaption())
+                        .build())
+                .toList();
     }
 }
 
