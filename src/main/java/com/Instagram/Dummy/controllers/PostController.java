@@ -60,4 +60,9 @@ public class PostController {
         return ResponseEntity.ok(response);
 
     }
+
+    @GetMapping("/followed/{userId}")
+    public List<PostDTO> getFollowedPosts(@PathVariable Long userId) {
+        return postService.getPostsOfFollowedUsers(userId);
+    }
 }

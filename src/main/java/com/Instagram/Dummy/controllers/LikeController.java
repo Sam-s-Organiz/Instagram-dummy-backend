@@ -44,4 +44,21 @@ public class LikeController {
         return ResponseEntity.ok(posts);
     }
 
+//    @GetMapping("/post/{postId}")
+//    public ResponseEntity<?> getLikeCountForPost(@PathVariable Long postId) {
+//        logger.info("Fetching like count for post with ID: {}", postId);
+//        try {
+//            long likeCount = likeService.getLikeCountForPost(postId);
+//            return ResponseEntity.ok(likeCount);
+//        } catch (PostNotFoundException e) {
+//            logger.error("Post with ID {} not found", postId, e);
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post not found");
+//        } catch (Exception e) {
+//            logger.error("An error occurred while fetching like count for post ID {}", postId, e);
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
+//        }
+//
+//    }
+
+
 }

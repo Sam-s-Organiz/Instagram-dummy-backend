@@ -42,11 +42,9 @@ public class LikeService {
         Optional<Like> existingLike = likeRepository.findByUserIdAndPostId(user.getId(), postId);
 
         if (existingLike.isPresent()) {
-            // Dislike the post (delete the like)
             likeRepository.delete(existingLike.get());
             return "disliked";
         } else {
-            // Like the post
             Like like = new Like();
             like.setPost(optionalPost.get());
             like.setUser(user);
@@ -58,7 +56,6 @@ public class LikeService {
 
     @Cacheable(value = "postsWithLikes", key = "#root.methodName")
     public List<PostDTO> getAllPostsWithLikes() {
-        System.out.println("Fetching posts from the database and caching...");
         List<Post> posts = postRepository.findAll();
         return posts.stream()
                 .map(post -> PostDTO.builder()
@@ -70,5 +67,6 @@ public class LikeService {
                         .build())
                 .toList();
     }
+    
 }
 

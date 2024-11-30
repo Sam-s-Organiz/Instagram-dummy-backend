@@ -16,6 +16,7 @@ public class PostDTO {
     private String caption;
     private String imageUrl;
     private byte[] fileData;
+    private int likeCount;
 
 }
 

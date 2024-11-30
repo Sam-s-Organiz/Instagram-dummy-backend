@@ -9,4 +9,8 @@ import java.util.List;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findByUserId(Long userId);
+
+    List<Post> findByUserIdIn(List<Long> userIds); // Fetch posts for multiple users
+
+
 }

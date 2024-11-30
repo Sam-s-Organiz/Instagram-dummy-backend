@@ -3,6 +3,8 @@ package com.Instagram.Dummy.services;
 import com.Instagram.Dummy.modals.Post;
 import com.Instagram.Dummy.modals.User;
 import com.Instagram.Dummy.pojo.PostDTO;
+import com.Instagram.Dummy.repo.FollowRepository;
+import com.Instagram.Dummy.repo.LikeRepository;
 import com.Instagram.Dummy.repo.PostRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,12 @@ public class PostService {
 
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private LikeRepository likeRepository;
+
+    @Autowired
+    private FollowRepository followRepository;
 
     @Async
     public void createPost(User user, MultipartFile file, String imageUrl, String caption) {
@@ -79,7 +87,12 @@ public class PostService {
 
     public List<PostDTO> getPostsByUser(Long userId) {
         return postRepository.findByUserId(userId).stream()
-                .map(this::convertToPostDTO)
+                .map(post -> {
+                    int likeCount = likeRepository.countByPostId(post.getId());
+                    PostDTO postDTO = convertToPostDTO(post);
+                    postDTO.setLikeCount(likeCount);
+                    return postDTO;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -87,12 +100,13 @@ public class PostService {
         return PostDTO.builder()
                 .id(post.getId())
                 .userId(post.getUser().getId())
-                .username(post.getUser().getUsername())
+                .username(post.getUser().getUsername()) // Ensure this is correct
                 .caption(post.getCaption())
                 .imageUrl("URL".equals(post.getSourceType()) ? post.getImageUrl() : null)
                 .fileData("FILE".equals(post.getSourceType()) ? post.getFileData() : null)
                 .build();
     }
+
 
     // Method to resize the image to the desired dimensions (width and height)
     private byte[] resizeImage(MultipartFile file, int width, int height) throws IOException {
@@ -110,6 +124,23 @@ public class PostService {
         ImageIO.write(bufferedImage, "JPEG", outputStream);  // Save as JPEG for better compression
         return outputStream.toByteArray();
     }
+
+    public List<PostDTO> getPostsOfFollowedUsers(User loggedInUser) {
+        // Fetch the IDs of users followed by the logged-in user
+        List<Long> followingIds = followRepository.findFollowingIdsByFollowerId(loggedInUser.getId());
+
+        // Fetch posts of the followed users
+        return postRepository.findByUserIdIn(followingIds).stream()
+                .map(post -> {
+                    int likeCount = likeRepository.countByPostId(post.getId());
+                    PostDTO postDTO = convertToPostDTO(post);
+                    postDTO.setLikeCount(likeCount); // Add like count
+                    return postDTO;
+                })
+                .collect(Collectors.toList());
+    }
+
+
 }
 
 
