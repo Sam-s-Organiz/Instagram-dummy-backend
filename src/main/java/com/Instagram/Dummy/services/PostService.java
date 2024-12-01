@@ -1,5 +1,6 @@
 package com.Instagram.Dummy.services;
 
+import com.Instagram.Dummy.config.JwtUserDetails;
 import com.Instagram.Dummy.modals.Post;
 import com.Instagram.Dummy.modals.User;
 import com.Instagram.Dummy.pojo.PostDTO;
@@ -9,6 +10,8 @@ import com.Instagram.Dummy.repo.PostRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -125,16 +128,22 @@ public class PostService {
         return outputStream.toByteArray();
     }
 
-    public List<PostDTO> getPostsOfFollowedUsers(User loggedInUser) {
-        // Fetch the IDs of users followed by the logged-in user
-        List<Long> followingIds = followRepository.findFollowingIdsByFollowerId(loggedInUser.getId());
+    public List<PostDTO> getPostsOfFollowedUsersAndSelf() {
+        // Retrieve the logged-in user's details
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+        User user = jwtUserDetails.getUser();
 
-        // Fetch posts of the followed users
+        List<Long> followingIds = followRepository.findFollowingIdsByFollowerId(user.getId());
+
+        followingIds.add(user.getId());
+
+        // Fetch posts from both the followed users and the logged-in user
         return postRepository.findByUserIdIn(followingIds).stream()
                 .map(post -> {
                     int likeCount = likeRepository.countByPostId(post.getId());
                     PostDTO postDTO = convertToPostDTO(post);
-                    postDTO.setLikeCount(likeCount); // Add like count
+                    postDTO.setLikeCount(likeCount);
                     return postDTO;
                 })
                 .collect(Collectors.toList());
@@ -142,5 +151,3 @@ public class PostService {
 
 
 }
-
-
