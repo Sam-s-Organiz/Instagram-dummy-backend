@@ -46,7 +46,7 @@ public class PostController {
                 return ResponseEntity.badRequest().body("Provide either file or imageUrl, not both.");
             }
             postService.createPost(user, file, imageUrl, caption);
-            return ResponseEntity.ok("Image uploaded successfully: " );
+            return ResponseEntity.ok("Image uploaded successfully: ");
 
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Failed to upload image: " + e.getMessage());
@@ -61,8 +61,8 @@ public class PostController {
 
     }
 
-    @GetMapping("/followed/{userId}")
-    public List<PostDTO> getFollowedPosts(@PathVariable Long userId) {
-        return postService.getPostsOfFollowedUsers(userId);
+    @GetMapping("/followed")
+    public List<PostDTO> getFollowedPosts() {
+        return postService.getPostsOfFollowedUsersAndSelf();
     }
 }
