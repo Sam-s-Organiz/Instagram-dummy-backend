@@ -1,30 +1,101 @@
 package com.Instagram.Dummy.services;
 
 import com.Instagram.Dummy.modals.User;
+import com.Instagram.Dummy.pojo.UserDto;
 import com.Instagram.Dummy.pojo.UserRequest;
 import com.Instagram.Dummy.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Optional;
 
 @Service
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private JWTservice jwTservice;
+
+    private User findUserByEmailOrThrow(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
+
+    public User findUserByIdOrThrow(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
+
+//    public User getUserById(Long userId) {
+//        User user = findUserByIdOrThrow(userId);
+//
+//        User userDTO = new User();
+//        userDTO.setId(user.getId());
+//        userDTO.setUsername(user.getUsername());
+//        userDTO.setEmail(user.getEmail());
+//        userDTO.setProfilePicture(user.getProfilePicture());
+//        userDTO.setBio(user.getBio());
+//        return userDTO;
+//    }
+    public Optional<User> getUserById(Long userId) {
+        return userRepository.findById(userId);
+    }
+
 
     public ResponseEntity<User> createUser(UserRequest userRequest) {
-        System.out.println("UserRequestsss :"+userRequest);
+        System.out.println("Register UserRequest :" + userRequest);
         User user = new User();
         user.setUsername(userRequest.getUsername());
         user.setEmail(userRequest.getEmail());
-        user.setPassword(userRequest.getPassword());
-        user.setProfilePicture(userRequest.getProfilePicture());
+        user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         user.setBio(userRequest.getBio());
-        System.out.println("userrrrr :"+user);
 
         User savedUser = userRepository.save(user);
         return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
+
+    public UserDto login(UserRequest userRequest) {
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userRequest.getEmail(), userRequest.getPassword()));
+        // Check if the password matches
+        if (authentication.isAuthenticated()) {
+            User user = findUserByEmailOrThrow(userRequest.getEmail());
+            UserDto userDto = new UserDto();
+            userDto.setId(user.getId());
+            userDto.setUsername(user.getUsername());
+            userDto.setEmail(user.getEmail());
+            userDto.setProfilePicture(user.getProfilePicture());
+            userDto.setBio(user.getBio());
+            userDto.setJtwToken(jwTservice.generateToken(userRequest.getEmail()));
+            return userDto;
+
+        }
+
+//        if (!user.getPassword().equals(userRequest.getPassword())) {
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid password");
+//        }
+
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid password");
+    }
+
+    public ResponseEntity<String> updateProfilePhoto(Long id, String profilePhoto) {
+        User user = findUserByIdOrThrow(id);
+
+        user.setProfilePicture(profilePhoto);
+        userRepository.save(user);
+        return new ResponseEntity<>("Profile picture updated successfully", HttpStatus.OK);
+    }
+
+
 }

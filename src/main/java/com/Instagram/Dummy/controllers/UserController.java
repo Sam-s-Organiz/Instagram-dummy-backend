@@ -1,31 +1,54 @@
 package com.Instagram.Dummy.controllers;
 
 import com.Instagram.Dummy.modals.User;
+import com.Instagram.Dummy.pojo.UserDto;
 import com.Instagram.Dummy.pojo.UserRequest;
 import com.Instagram.Dummy.services.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.Map;
-
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
+@CrossOrigin(origins = "*")
 public class UserController {
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     private UserService userService;
 
-    @PostMapping
-    public ResponseEntity<User> addNewUser(@RequestBody UserRequest userRequest) {
-        System.out.println("Requeeeeest :"+userRequest);
+    @PostMapping("/register")
+    public ResponseEntity<User> SignUp(@RequestBody UserRequest userRequest) {
+        logger.info("SignUp request received: {}", userRequest);
         return userService.createUser(userRequest);
     }
-    @GetMapping("/user")
-    public Map<String, Object> user(@AuthenticationPrincipal OAuth2User principal) {
-        return Collections.singletonMap("name", principal.getAttribute("name"));
+
+    @PostMapping("/login")
+    public UserDto signIn(@RequestBody UserRequest userRequest) {
+        logger.info("SignIn request received: {}", userRequest);
+        return userService.login(userRequest);
     }
+
+    @PatchMapping("/profilepic")
+    public ResponseEntity<String> uploadProfilePic(
+            @RequestParam Long userId,
+            @RequestParam String profilePhoto
+    ) {
+        logger.info("Inside uploadProfilePic function: {}", profilePhoto);
+        return userService.updateProfilePhoto(userId, profilePhoto);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        User user = userService.findUserByIdOrThrow(id);
+        return ResponseEntity.ok(user);
+    }
+
+//    @GetMapping("/{id}")
+//    public UserDto getUserUsingId(@PathVariable Long id) {
+//        return userService.getUserById(id);
+//    }
+
 }

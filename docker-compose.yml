@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  redis:
+    container_name: redis
+    image: redis:6.2
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    restart: unless-stopped
+
+  redis-commander:
+    container_name: redis-commander
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8082:8081" # Map port 8081 of the container to 8082 on the host
+    depends_on:
+      - redis
+
+volumes:
+  redis_data:
