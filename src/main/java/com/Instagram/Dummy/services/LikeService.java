@@ -1,13 +1,16 @@
 package com.Instagram.Dummy.services;
 
+import com.Instagram.Dummy.config.JwtUserDetails;
 import com.Instagram.Dummy.exceptions.PostNotFoundException;
-import com.Instagram.Dummy.exceptions.UserAlreadyLikedPostException;
 import com.Instagram.Dummy.modals.Like;
 import com.Instagram.Dummy.modals.Post;
 import com.Instagram.Dummy.modals.User;
+import com.Instagram.Dummy.pojo.PostDTO;
 import com.Instagram.Dummy.repo.LikeRepository;
 import com.Instagram.Dummy.repo.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -24,35 +27,46 @@ public class LikeService {
     @Autowired
     private LikeRepository likeRepository;
 
-    public Like likePost(Long postId) {
-        // Extract the user from the security context
+    @CacheEvict(value = "postsWithLikes", key = "#postId")
+    public String likeOrDislikePost(Long postId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal(); // Assuming you're using Spring Security
+        JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
+        User user = jwtUserDetails.getUser();
 
-        // Check if the post exists
         Optional<Post> optionalPost = postRepository.findById(postId);
-        if (optionalPost.isPresent()) {
-            Post post = optionalPost.get();
-            // Check if the user has already liked this post
-            if (!likeRepository.existsByUserIdAndPostId(user.getId(), postId)) {
-                Like like = new Like();
-                like.setPost(post);
-                like.setUser(user);
-                return likeRepository.save(like);
-            } else {
-                // Handle the case where the user has already liked this post
-                throw new UserAlreadyLikedPostException("User has already liked this post.");
-            }
+        if (optionalPost.isEmpty()) {
+            throw new PostNotFoundException("Post with ID " + postId + " not found");
+        }
+
+        // Check if the like already exists
+        Optional<Like> existingLike = likeRepository.findByUserIdAndPostId(user.getId(), postId);
+
+        if (existingLike.isPresent()) {
+            likeRepository.delete(existingLike.get());
+            return "disliked";
         } else {
-             throw new PostNotFoundException(postId);
+            Like like = new Like();
+            like.setPost(optionalPost.get());
+            like.setUser(user);
+            likeRepository.save(like);
+            return "liked";
         }
     }
 
-    // Method to get all posts with like counts
-    public List<Post> getAllPostsWithLikes() {
+
+    @Cacheable(value = "postsWithLikes", key = "#root.methodName")
+    public List<PostDTO> getAllPostsWithLikes() {
         List<Post> posts = postRepository.findAll();
-        posts.forEach(post -> post.setLikes(likeRepository.findByPostId(post.getId()))); // Set likes for each post
-        return posts;
+        return posts.stream()
+                .map(post -> PostDTO.builder()
+                        .id(post.getId())
+                        .userId(post.getUser().getId())
+                        .username(post.getUser().getUsername())
+                        .imageUrl(post.getImageUrl())
+                        .caption(post.getCaption())
+                        .build())
+                .toList();
     }
+    
 }
 

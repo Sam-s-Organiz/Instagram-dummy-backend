@@ -1,7 +1,7 @@
 package com.Instagram.Dummy.exceptions;
 
 public class PostNotFoundException extends RuntimeException {
-    public PostNotFoundException(Long postId) {
+    public PostNotFoundException(String postId) {
         super("Post not found with ID: " + postId);
     }
 }

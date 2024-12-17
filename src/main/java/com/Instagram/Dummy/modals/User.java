@@ -19,14 +19,13 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String jwt;
     @Column(unique = true, nullable = false)
     private String username;
 
     @Column(unique = true, nullable = false)
     private String email;
 
-    @JsonIgnore // Ignore password in JSON response
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 
@@ -41,7 +40,7 @@ public class User {
 
     @OneToMany(mappedBy = "follower")
     @JsonBackReference
-    @ToString.Exclude // Prevent recursive serialization
+    @ToString.Exclude
     private Set<Follow> following;
 
     @OneToMany(mappedBy = "following")

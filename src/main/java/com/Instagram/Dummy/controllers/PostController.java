@@ -2,7 +2,6 @@ package com.Instagram.Dummy.controllers;
 
 import com.Instagram.Dummy.modals.User;
 import com.Instagram.Dummy.pojo.PostDTO;
-import com.Instagram.Dummy.pojo.PostImageResponse;
 import com.Instagram.Dummy.services.PostService;
 import com.Instagram.Dummy.services.UserService;
 import org.slf4j.Logger;
@@ -17,7 +16,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/posts")
 @CrossOrigin(origins = "*")
-
 public class PostController {
 
     @Autowired
@@ -39,16 +37,16 @@ public class PostController {
             User user = userService.getUserById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            // Check that either file or imageUrl is provided, but not both
-            if ((file == null || file.isEmpty()) && (imageUrl == null || imageUrl.isEmpty())) {
+            boolean isFileProvided = file != null && !file.isEmpty();
+            boolean isImageUrlProvided = imageUrl != null && !imageUrl.isEmpty();
+            if (!isFileProvided && !isImageUrlProvided) {
                 return ResponseEntity.badRequest().body("Either file or imageUrl must be provided.");
-            } else if (file != null && !file.isEmpty() && imageUrl != null && !imageUrl.isEmpty()) {
+            }
+            if (isFileProvided && isImageUrlProvided) {
                 return ResponseEntity.badRequest().body("Provide either file or imageUrl, not both.");
             }
-
-            PostImageResponse response = postService.createPost(user, file, imageUrl, caption);
-
-            return ResponseEntity.ok("Image uploaded successfully: " + response);
+            postService.createPost(user, file, imageUrl, caption);
+            return ResponseEntity.ok("Image uploaded successfully: ");
 
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Failed to upload image: " + e.getMessage());
@@ -61,5 +59,10 @@ public class PostController {
         List<PostDTO> response = postService.getPostsByUser(userId);
         return ResponseEntity.ok(response);
 
+    }
+
+    @GetMapping("/followed")
+    public List<PostDTO> getFollowedPosts() {
+        return postService.getPostsOfFollowedUsersAndSelf();
     }
 }

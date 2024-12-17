@@ -1,10 +1,9 @@
 package com.Instagram.Dummy.modals;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.Set;
 
@@ -12,15 +11,18 @@ import java.util.Set;
 @Table(name = "posts")
 @Getter
 @Setter
-@NoArgsConstructor
 @ToString
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private User user;
 
     @Column(nullable = false)
@@ -40,15 +42,11 @@ public class Post {
     private String sourceType;
 
     @Lob
+    @JsonIgnore
     @Column(name = "file_data", columnDefinition = "LONGBLOB")
     private byte[] fileData;
 
     public int getLikesCount() {
         return likes != null ? likes.size() : 0;
     }
-
-
-
-
-
 }
