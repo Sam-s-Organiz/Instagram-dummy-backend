@@ -1,10 +1,14 @@
 package com.Instagram.Dummy.services;
 
 import com.Instagram.Dummy.modals.User;
+import com.Instagram.Dummy.pojo.SearchRequestParameters;
 import com.Instagram.Dummy.pojo.UserDto;
 import com.Instagram.Dummy.pojo.UserRequest;
 import com.Instagram.Dummy.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,7 +18,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -38,21 +44,9 @@ public class UserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
-//    public User getUserById(Long userId) {
-//        User user = findUserByIdOrThrow(userId);
-//
-//        User userDTO = new User();
-//        userDTO.setId(user.getId());
-//        userDTO.setUsername(user.getUsername());
-//        userDTO.setEmail(user.getEmail());
-//        userDTO.setProfilePicture(user.getProfilePicture());
-//        userDTO.setBio(user.getBio());
-//        return userDTO;
-//    }
     public Optional<User> getUserById(Long userId) {
         return userRepository.findById(userId);
     }
-
 
     public ResponseEntity<User> createUser(UserRequest userRequest) {
         System.out.println("Register UserRequest :" + userRequest);
@@ -67,35 +61,51 @@ public class UserService {
     }
 
     public UserDto login(UserRequest userRequest) {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userRequest.getEmail(), userRequest.getPassword()));
-        // Check if the password matches
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(userRequest.getEmail(), userRequest.getPassword())
+        );
+
         if (authentication.isAuthenticated()) {
             User user = findUserByEmailOrThrow(userRequest.getEmail());
-            UserDto userDto = new UserDto();
-            userDto.setId(user.getId());
-            userDto.setUsername(user.getUsername());
-            userDto.setEmail(user.getEmail());
-            userDto.setProfilePicture(user.getProfilePicture());
-            userDto.setBio(user.getBio());
-            userDto.setJtwToken(jwTservice.generateToken(userRequest.getEmail()));
-            return userDto;
-
+            return convertToUserDto(user, jwTservice.generateToken(userRequest.getEmail()));
         }
-
-//        if (!user.getPassword().equals(userRequest.getPassword())) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid password");
-//        }
 
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid password");
     }
 
     public ResponseEntity<String> updateProfilePhoto(Long id, String profilePhoto) {
         User user = findUserByIdOrThrow(id);
-
         user.setProfilePicture(profilePhoto);
         userRepository.save(user);
         return new ResponseEntity<>("Profile picture updated successfully", HttpStatus.OK);
     }
 
+    public List<UserDto> searchUsers(String searchTerm, SearchRequestParameters searchRequestParameters) {
+        int pageNumber = searchRequestParameters.getPageNumber();
+        int pageSize = (int) searchRequestParameters.getPageSize();
 
+        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+
+        Page<User> userPage = userRepository.findUsersByUsernameOrEmailContaining(searchTerm, pageRequest);
+
+        return userPage.stream()
+                .map(this::convertToUserDto)
+                .collect(Collectors.toList());
+    }
+
+    private UserDto convertToUserDto(User user) {
+        return convertToUserDto(user, null);
+    }
+
+
+    private UserDto convertToUserDto(User user, String jwtToken) {
+        UserDto userDto = new UserDto();
+        userDto.setId(user.getId());
+        userDto.setUsername(user.getUsername());
+        userDto.setEmail(user.getEmail());
+        userDto.setProfilePicture(user.getProfilePicture());
+        userDto.setBio(user.getBio());
+        userDto.setJtwToken(jwtToken);
+        return userDto;
+    }
 }
