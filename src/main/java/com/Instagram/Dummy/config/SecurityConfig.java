@@ -1,5 +1,6 @@
 package com.Instagram.Dummy.config;
 
+import com.Instagram.Dummy.handler.CustomOAuth2LoginSuccessHandler;
 import com.Instagram.Dummy.modals.User;
 import com.Instagram.Dummy.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,23 +25,30 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     @Lazy
-    private JWTfilter jwTfilter;
+    private JWTfilter jwtFilter;
 
+    @Autowired
+    private CustomOAuth2LoginSuccessHandler successHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Ensures stateless sessions for JWT
-                .authorizeHttpRequests(request -> request
-                        .requestMatchers("/api/user/login", "/api/user/register").permitAll()
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Stateless for JWT
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/user/login", "/api/user/register", "/oauth2/**").permitAll()
                         .anyRequest().authenticated())
-                .addFilterBefore(jwTfilter, UsernamePasswordAuthenticationFilter.class) // Add JWT filter
+                .oauth2Login(oauth -> oauth
+                        .successHandler(successHandler) // Custom success handler for Google login
+                )
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) // Add JWT filter
                 .build();
     }
 

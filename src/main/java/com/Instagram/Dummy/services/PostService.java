@@ -64,7 +64,7 @@ public class PostService {
     @Async
     private void savePostWithFileData(User user, MultipartFile file, String caption) {
         try {
-            byte[] resizedFileData = resizeImage(file, 800, 600);
+            byte[] resizedFileData = resizeImage(file);
 
             savePost(user, caption, "FILE", null, resizedFileData);
         } catch (IOException e) {
@@ -112,14 +112,14 @@ public class PostService {
 
 
     // Method to resize the image to the desired dimensions (width and height)
-    private byte[] resizeImage(MultipartFile file, int width, int height) throws IOException {
+    private byte[] resizeImage(MultipartFile file) throws IOException {
         BufferedImage image = ImageIO.read(file.getInputStream());
 
         // Scale the image to the desired dimensions (with smooth scaling)
-        Image scaledImage = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        Image scaledImage = image.getScaledInstance(800, 600, Image.SCALE_SMOOTH);
 
         // Create a new BufferedImage to hold the resized image
-        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        BufferedImage bufferedImage = new BufferedImage(800, 600, BufferedImage.TYPE_INT_RGB);
         bufferedImage.getGraphics().drawImage(scaledImage, 0, 0, null);
 
         // Convert the resized image to a byte array
@@ -128,7 +128,7 @@ public class PostService {
         return outputStream.toByteArray();
     }
 
-    public List<PostDTO> getPostsOfFollowedUsersAndSelf() {
+    public List<PostDTO> getPostsOfFollowedUsersAndSelf() { 
         // Retrieve the logged-in user's details
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         JwtUserDetails jwtUserDetails = (JwtUserDetails) authentication.getPrincipal();
