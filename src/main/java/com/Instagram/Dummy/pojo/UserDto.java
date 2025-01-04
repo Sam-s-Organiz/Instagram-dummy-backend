@@ -14,6 +14,7 @@ public class UserDto {
     private String email;
     private String profilePicture;
     private String bio;
+    private boolean isFollowed;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String jtwToken;
 }

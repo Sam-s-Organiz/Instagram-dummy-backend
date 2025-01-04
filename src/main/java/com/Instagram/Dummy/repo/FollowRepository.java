@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface FollowRepository extends JpaRepository<Follow, Long> {
@@ -21,4 +22,10 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
 
     @Query("SELECT f.following.id FROM Follow f WHERE f.follower.id = :followerId")
     List<Long> findFollowingIdsByFollowerId(Long followerId);
+
+    @Query("SELECT f.following.id FROM Follow f WHERE f.follower.id = :currentUserId AND f.following.id IN :userIds")
+    List<Long> findFollowedUserIds(Long currentUserId, List<Long> userIds);
+
+    Optional<Follow> findByFollowerAndFollowing(User follower, User following);
+
 }

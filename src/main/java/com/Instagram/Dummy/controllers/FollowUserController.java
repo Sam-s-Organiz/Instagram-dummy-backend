@@ -20,16 +20,23 @@ public class FollowUserController {
     private FollowService followService;
 
     @PostMapping("/follow/{followerId}")
-    public ResponseEntity<String> followUser(@PathVariable  Long followerId) {
+    public ResponseEntity<String> followUser(@PathVariable Long followerId) {
         logger.info("Follow request: follows User {}", followerId);
-        followService.followUser(followerId); // Call followUser method from FollowService
+        followService.followUser(followerId);
         return ResponseEntity.ok("User followed successfully");
+    }
+
+    @PostMapping("/unfollow/{followingId}")
+    public ResponseEntity<String> unfollowUser(@PathVariable Long followingId) {
+        logger.info("Unfollow request: unfollows User {}", followingId);
+        followService.unfollowUser(followingId); // Call unfollowUser method from FollowService
+        return ResponseEntity.ok("User unfollowed successfully");
     }
 
     @GetMapping("/follow/count/{userId}")
     public ResponseEntity<Map<String, Integer>> getFollowCounts(@PathVariable Long userId) {
         logger.info("Fetching follower and following count for User {}", userId);
-        Map<String, Integer> followCounts = followService.getFollowCounts(userId); // Call followService method
+        Map<String, Integer> followCounts = followService.getFollowCounts(userId);
         return ResponseEntity.ok(followCounts);
     }
 }

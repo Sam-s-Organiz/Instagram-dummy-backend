@@ -4,7 +4,10 @@ import com.Instagram.Dummy.modals.User;
 import com.Instagram.Dummy.pojo.SearchRequestParameters;
 import com.Instagram.Dummy.pojo.UserDto;
 import com.Instagram.Dummy.pojo.UserRequest;
+import com.Instagram.Dummy.repo.FollowRepository;
 import com.Instagram.Dummy.repo.UserRepository;
+import com.Instagram.Dummy.utils.AuthenticatedUserUtil;
+import org.slf4j.ILoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,6 +36,11 @@ public class UserService {
     private AuthenticationManager authenticationManager;
     @Autowired
     private JWTservice jwTservice;
+    @Autowired
+    private FollowRepository followRepository;
+    @Autowired
+    public AuthenticatedUserUtil authenticatedUserUtil;
+
 
     private User findUserByEmailOrThrow(String email) {
         return userRepository.findByEmail(email)
@@ -80,18 +88,36 @@ public class UserService {
         return new ResponseEntity<>("Profile picture updated successfully", HttpStatus.OK);
     }
 
-    public List<UserDto> searchUsers(String searchTerm, SearchRequestParameters searchRequestParameters) {
-        int pageNumber = searchRequestParameters.getPageNumber();
-        int pageSize = (int) searchRequestParameters.getPageSize();
 
-        Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+    public List<UserDto> searchUsers(String searchTerm, SearchRequestParameters searchRequestParameters) {
+        Pageable pageRequest = PageRequest.of(
+                searchRequestParameters.getPageNumber(),
+                (int) searchRequestParameters.getPageSize()
+        );
 
         Page<User> userPage = userRepository.findUsersByUsernameOrEmailContaining(searchTerm, pageRequest);
 
+        Long currentUserId = AuthenticatedUserUtil.getAuthenticatedUser().getId();
+        System.out.println("currentUserId"+currentUserId);
+
+        List<Long> userIds = userPage.stream()
+                .map(User::getId)
+                .collect(Collectors.toList());
+
+        List<Long> followedUserIds = followRepository.findFollowedUserIds(currentUserId, userIds);
+
         return userPage.stream()
-                .map(this::convertToUserDto)
+                .map(user -> convertToUserDtoWithFollowStatus(user, followedUserIds))
                 .collect(Collectors.toList());
     }
+
+
+    private UserDto convertToUserDtoWithFollowStatus(User user, List<Long> followedUserIds) {
+        UserDto userDto = convertToUserDto(user); // Reuse existing conversion logic
+        userDto.setFollowed(followedUserIds.contains(user.getId())); // Set follow status
+        return userDto;
+    }
+
 
     private UserDto convertToUserDto(User user) {
         return convertToUserDto(user, null);
