@@ -1,89 +1,88 @@
 package com.Instagram.Dummy.services;
 
+import com.Instagram.Dummy.exceptions.BadRequestException;
 import com.Instagram.Dummy.modals.Follow;
 import com.Instagram.Dummy.modals.User;
 import com.Instagram.Dummy.repo.FollowRepository;
+import com.Instagram.Dummy.repo.PostRepository;
 import com.Instagram.Dummy.repo.UserRepository;
 import com.Instagram.Dummy.utils.AuthenticatedUserUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+@Slf4j
 @Service
 public class FollowService {
 
-    private final FollowRepository followRepository;
-    private final UserRepository userRepository;
-    @Autowired
-    public AuthenticatedUserUtil authenticatedUserUtil;
+  private final FollowRepository followRepository;
+  private final UserRepository userRepository;
+  private final AuthenticatedUserUtil authUtil;
 
-    @Autowired
-    public FollowService(FollowRepository followRepository, UserRepository userRepository) {
-        this.followRepository = followRepository;
-        this.userRepository = userRepository;
+    public FollowService(
+      FollowRepository followRepository,
+      UserRepository userRepository,
+      AuthenticatedUserUtil authUtil,
+      PostRepository postRepository) {
+    this.followRepository = followRepository;
+    this.userRepository = userRepository;
+    this.authUtil = authUtil;
     }
 
-    public void followUser(Long followingId) {
-        User follower = AuthenticatedUserUtil.getAuthenticatedUser(); // Fetch authenticated user
-        User following = findUserById(followingId);
+  @Transactional
+  public void followUser(Long targetUserId) {
+    User sourceUser = authUtil.getAuthenticatedUser();
+    User targetUser = getUserOrThrow(targetUserId);
 
-        validateFollowAction(follower, following);
-
-        Follow follow = new Follow();
-        follow.setFollower(follower);
-        follow.setFollowing(following);
-
-        followRepository.save(follow);
+    if (sourceUser.equals(targetUser)) {
+      throw new BadRequestException("You cannot follow yourself.");
     }
 
-    public void unfollowUser(Long followingId) {
-        User follower = AuthenticatedUserUtil.getAuthenticatedUser(); // Fetch authenticated user
-        User following = findUserById(followingId);
-
-        validateUnfollowAction(follower, following);
-
-        Follow follow = followRepository.findByFollowerAndFollowing(follower, following)
-                .orElseThrow(() -> new RuntimeException("Follow relationship does not exist"));
-
-        followRepository.delete(follow);
+    if (followRepository.existsBySourceUserAndTargetUser(sourceUser, targetUser)) {
+      throw new BadRequestException("You are already following this user.");
     }
 
-    private void validateUnfollowAction(User follower, User following) {
-        if (follower.getId().equals(following.getId())) {
-            throw new RuntimeException("A user cannot unfollow themselves");
-        }
+    Follow follow = new Follow();
+    follow.setSourceUser(sourceUser);
+    follow.setTargetUser(targetUser);
+    followRepository.save(follow);
+  }
 
-        if (!followRepository.existsByFollowerAndFollowing(follower, following)) {
-            throw new RuntimeException("User is not following this account");
-        }
+  @Transactional
+  public void unfollowUser(Long targetUserId) {
+    User sourceUser = authUtil.getAuthenticatedUser();
+    User targetUser = getUserOrThrow(targetUserId);
+
+    if (sourceUser.equals(targetUser)) {
+      throw new BadRequestException("You cannot unfollow yourself.");
     }
 
+    Follow follow =
+        followRepository
+            .findBySourceUserAndTargetUser(sourceUser, targetUser)
+            .orElseThrow(() -> new BadRequestException("You are not following this user."));
 
-    public Map<String, Integer> getFollowCounts(Long userId) {
-        int followersCount = followRepository.countFollowers(userId);
-        int followingCount = followRepository.countFollowing(userId);
+    followRepository.delete(follow);
+  }
 
-        Map<String, Integer> followCounts = new HashMap<>();
-        followCounts.put("followersCount", followersCount);
-        followCounts.put("followingCount", followingCount);
+  public Map<String, Integer> getFollowCounts(Long userId) {
+    return Map.of(
+        "followersCount", followRepository.countFollowers(userId),
+        "followingCount", followRepository.countFollowing(userId));
+  }
 
-        return followCounts;
-    }
+  private User getUserOrThrow(Long userId) {
+    return userRepository
+        .findById(userId)
+        .orElseThrow(() -> new BadRequestException("User not found with ID: " + userId));
+  }
 
-    private User findUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
-    }
-
-    private void validateFollowAction(User follower, User following) {
-        if (follower.getId().equals(following.getId())) {
-            throw new RuntimeException("A user cannot follow themselves");
-        }
-
-        if (followRepository.existsByFollowerAndFollowing(follower, following)) {
-            throw new RuntimeException("User is already following this account");
-        }
-    }
+  public List<Long> getFollowedUserIdsIncludingSelf(Long userId) {
+    List<Long> followedIds = followRepository.findFollowingIdsByFollowerId(userId);
+    log.info("User {} is following (including self): {}", userId, followedIds);
+    followedIds.add(userId); // Include self for own posts
+    return followedIds;
+  }
 }

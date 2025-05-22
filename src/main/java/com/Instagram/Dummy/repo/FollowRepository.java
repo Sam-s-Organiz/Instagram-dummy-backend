@@ -1,31 +1,41 @@
 package com.Instagram.Dummy.repo;
 
 import com.Instagram.Dummy.modals.Follow;
+import com.Instagram.Dummy.modals.Post;
 import com.Instagram.Dummy.modals.User;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-
 @Repository
 public interface FollowRepository extends JpaRepository<Follow, Long> {
 
-    boolean existsByFollowerAndFollowing(User follower, User following);
+  boolean existsBySourceUserAndTargetUser(User sourceUser, User targetUser);
 
-    @Query("SELECT COUNT(f) FROM Follow f WHERE f.following.id = :userId")
-    int countFollowers(Long userId);
+  @Query("SELECT COUNT(f) FROM Follow f WHERE f.targetUser.id = :userId")
+  int countFollowers(Long userId);
 
-    @Query("SELECT COUNT(f) FROM Follow f WHERE f.follower.id = :userId")
-    int countFollowing(Long userId);
+  @Query("SELECT COUNT(f) FROM Follow f WHERE f.sourceUser.id = :userId")
+  int countFollowing(Long userId);
 
-    @Query("SELECT f.following.id FROM Follow f WHERE f.follower.id = :followerId")
-    List<Long> findFollowingIdsByFollowerId(Long followerId);
+  @Query(
+      """
+    SELECT p FROM Post p
+    WHERE p.user.id IN (
+        SELECT f.targetUser.id FROM Follow f WHERE f.sourceUser.id = :currentUserId
+    )
+    ORDER BY p.createdAt DESC
+    """)
+  List<Post> getFeedForUser(Long currentUserId);
 
-    @Query("SELECT f.following.id FROM Follow f WHERE f.follower.id = :currentUserId AND f.following.id IN :userIds")
-    List<Long> findFollowedUserIds(Long currentUserId, List<Long> userIds);
+  @Query(
+      "SELECT f.targetUser.id FROM Follow f WHERE f.sourceUser.id = :currentUserId AND f.targetUser.id IN :userIds")
+  List<Long> findFollowedUserIds(Long currentUserId, List<Long> userIds);
 
-    Optional<Follow> findByFollowerAndFollowing(User follower, User following);
+  @Query("SELECT f.targetUser.id FROM Follow f WHERE f.sourceUser.id = :followerId")
+  List<Long> findFollowingIdsByFollowerId(Long followerId);
 
+  Optional<Follow> findBySourceUserAndTargetUser(User sourceUser, User targetUser);
 }

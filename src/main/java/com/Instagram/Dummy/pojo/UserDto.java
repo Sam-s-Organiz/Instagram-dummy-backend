@@ -9,12 +9,13 @@ import lombok.ToString;
 @Setter
 @ToString
 public class UserDto {
-    private Long id;
-    private String username;
-    private String email;
-    private String profilePicture;
-    private String bio;
-    private boolean isFollowed;
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private String jtwToken;
+  private Long id;
+  private String username;
+  private String email;
+  private String profilePicture;
+  private String bio;
+  private boolean isFollowed;
+
+  @JsonInclude(JsonInclude.Include.NON_EMPTY)
+  private String jwtToken;
 }

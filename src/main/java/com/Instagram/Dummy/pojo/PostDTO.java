@@ -10,13 +10,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class PostDTO {
-    private Long id;
-    private Long userId;
-    private String username;
-    private String caption;
-    private String imageUrl;
-    private byte[] fileData;
-    private int likeCount;
-
+  private Long id;
+  private Long userId;
+  private String username;
+  private String caption;
+  private String imageUrl;
+  private byte[] fileData;
+  private int likeCount;
 }
-

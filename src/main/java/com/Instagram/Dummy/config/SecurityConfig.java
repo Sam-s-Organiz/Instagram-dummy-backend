@@ -24,50 +24,54 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    @Lazy
-    private JWTfilter jwTfilter;
+  @Autowired private UserRepository userRepository;
+  @Autowired @Lazy private JWTfilter jwTfilter;
 
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    return http.csrf(AbstractHttpConfigurer::disable)
+        .sessionManagement(
+            session ->
+                session.sessionCreationPolicy(
+                    SessionCreationPolicy.STATELESS)) // Ensures stateless sessions for JWT
+        .authorizeHttpRequests(
+            request ->
+                request
+                    .requestMatchers("/api/user/login", "/api/user/register", "/images/**")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated())
+        .addFilterBefore(jwTfilter, UsernamePasswordAuthenticationFilter.class) // Add JWT filter
+        .build();
+  }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Ensures stateless sessions for JWT
-                .authorizeHttpRequests(request -> request
-                        .requestMatchers("/api/user/login", "/api/user/register").permitAll()
-                        .anyRequest().authenticated())
-                .addFilterBefore(jwTfilter, UsernamePasswordAuthenticationFilter.class) // Add JWT filter
-                .build();
-    }
+  @Bean
+  public UserDetailsService userDetailsService() {
+    return email -> {
+      User user =
+          userRepository
+              .findByEmail(email)
+              .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+      return new JwtUserDetails(user); // Ensure JwtUserDetails implements UserDetails
+    };
+  }
 
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return email -> {
-            User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-            return new JwtUserDetails(user); // Ensure JwtUserDetails implements UserDetails
-        };
-    }
+  @Bean
+  public AuthenticationProvider authenticationProvider() {
+    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+    authProvider.setUserDetailsService(userDetailsService());
+    authProvider.setPasswordEncoder(passwordEncoder());
+    return authProvider;
+  }
 
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService());
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
-    }
+  @Bean
+  public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
+      throws Exception {
+    return config.getAuthenticationManager();
+  }
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(12);
-    }
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder(12);
+  }
 }

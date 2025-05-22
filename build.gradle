@@ -3,14 +3,15 @@ plugins {
     id 'org.springframework.boot' version '3.3.2'
     id 'io.spring.dependency-management' version '1.1.6'
     id 'application'
-}
-
-application {
-    mainClass = 'com.Instagram.Dummy.DummyApplication'  // Update this with your actual main class
+    id 'com.diffplug.spotless' version '6.25.0'
 }
 
 group = 'com.Instagram'
 version = '0.0.1-SNAPSHOT'
+
+application {
+    mainClass = 'com.Instagram.Dummy.DummyApplication'  // Replace with actual main class if different
+}
 
 java {
     toolchain {
@@ -22,42 +23,46 @@ repositories {
     mavenCentral()
 }
 
+spotless {
+    java {
+        googleJavaFormat() // Use google-java-format for consistent formatting
+        target 'src/**/*.java'
+    }
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.session:spring-session-jdbc'
     implementation 'com.mysql:mysql-connector-j:9.1.0'
-    implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.12.5'
-    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.12.5'
-    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.12.5'
+
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
+
+    // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis:3.4.0'
 
+    // Validation & Security
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.36'
+    annotationProcessor 'org.projectlombok:lombok:1.18.36'
+
+    // Reactive Web
+    implementation 'org.springframework:spring-webflux:6.1.14'
+
+    // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'org.springframework.security:spring-security-test'
-    // Lombok dependency
-    compileOnly 'org.projectlombok:lombok:1.18.36'
-    annotationProcessor 'org.projectlombok:lombok:1.18.36'
-
-    implementation 'org.springframework:spring-webflux:6.1.14'
-}
-
-ext {
-    lombokVersion = "1.18.36"
-    mapstructVersion = "1.3.1.Final"
-    springCloudVersion = "2023.0.2"
-    springCloudServicesVersion = "3.3.0"
-    azureAppInsightsVersion = "3.5.3"
-    sourceJdkVersion = JavaVersion.VERSION_17
-    targetJdkVersion = JavaVersion.VERSION_17
 }
 
 tasks.named('test') {
     useJUnitPlatform()
 }
-
-

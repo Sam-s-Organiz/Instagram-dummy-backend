@@ -1,14 +1,13 @@
 package com.Instagram.Dummy.modals;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -16,35 +15,36 @@ import java.util.Set;
 @Setter
 @ToString
 public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(unique = true, nullable = false)
-    private String username;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(unique = true, nullable = false)
-    private String email;
+  @Column(unique = true, nullable = false)
+  private String username;
 
-    @JsonIgnore
-    @Column(nullable = false)
-    private String password;
+  @Column(unique = true, nullable = false)
+  private String email;
 
-    private String profilePicture;
+  @JsonIgnore
+  @Column(nullable = false)
+  private String password;
 
-    private String bio;
+  private String profilePicture;
 
-    @OneToMany(mappedBy = "user")
-    @JsonManagedReference
-    @ToString.Exclude
-    private Set<Post> posts;
+  private String bio;
 
-    @OneToMany(mappedBy = "follower")
-    @JsonBackReference
-    @ToString.Exclude
-    private Set<Follow> following;
+  @OneToMany(mappedBy = "user")
+  @JsonManagedReference
+  @ToString.Exclude
+  private Set<Post> posts;
 
-    @OneToMany(mappedBy = "following")
-    @JsonBackReference
-    @ToString.Exclude
-    private Set<Follow> followers;
+  @OneToMany(mappedBy = "sourceUser")
+  @JsonBackReference
+  @ToString.Exclude
+  private Set<Follow> following;
+
+  @OneToMany(mappedBy = "targetUser")
+  @JsonBackReference
+  @ToString.Exclude
+  private Set<Follow> followers;
 }

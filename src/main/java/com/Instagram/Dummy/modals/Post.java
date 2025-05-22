@@ -1,52 +1,63 @@
 package com.Instagram.Dummy.modals;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
-
+import java.time.Instant;
 import java.util.Set;
+import lombok.*;
 
 @Entity
 @Table(name = "posts")
 @Getter
 @Setter
-@ToString
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"comments", "likes"})
 public class Post {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    @JsonBackReference
-    private User user;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", nullable = false)
+  @JsonIgnore
+  private User user;
 
-    @Column(nullable = false)
-    private String imageUrl;
+  @Column(nullable = false)
+  private String imageUrl;
 
-    private String caption;
+  private String caption;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
-    private Set<Comment> comments;
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonIgnore
+  private Set<Comment> comments;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
-    private Set<Like> likes;
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonIgnore
+  private Set<Like> likes;
 
-    @Column(nullable = false)
-    private String sourceType;
+  @Column(nullable = false)
+  private String sourceType;
 
-    @Lob
-    @JsonIgnore
-    @Column(name = "file_data", columnDefinition = "LONGBLOB")
-    private byte[] fileData;
+  @Column(nullable = false, updatable = false)
+  private Instant createdAt;
 
-    public int getLikesCount() {
-        return likes != null ? likes.size() : 0;
-    }
+  @Column(nullable = false)
+  private Instant updatedAt;
+
+  @PrePersist
+  protected void onCreate() {
+    createdAt = Instant.now();
+    updatedAt = Instant.now();
+  }
+
+  @PreUpdate
+  protected void onUpdate() {
+    updatedAt = Instant.now();
+  }
+
+  public int getLikesCount() {
+    return likes != null ? likes.size() : 0;
+  }
 }
