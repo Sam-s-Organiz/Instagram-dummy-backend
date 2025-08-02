@@ -48,7 +48,9 @@ dependencies {
     // Validation & Security
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-
+    implementation("org.flywaydb:flyway-core:11.10.5")
+    implementation("org.keycloak:keycloak-spring-boot-starter:25.0.3")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server:4.0.0-M1")
     // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.36'
     annotationProcessor 'org.projectlombok:lombok:1.18.36'

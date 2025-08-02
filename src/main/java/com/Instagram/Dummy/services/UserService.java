@@ -34,9 +34,16 @@ public class UserService {
   @Autowired private FollowRepository followRepository;
   @Autowired private AuthenticatedUserUtil authenticatedUserUtil;
   @Autowired private UserMapper userMapper;
+  @Autowired private TenantService tenantService;
 
   public ResponseEntity<User> createUser(UserRequest userRequest) {
     System.out.println("Register UserRequest: " + userRequest);
+    String tenantId = userRequest.getTenantId();
+    if (tenantId == null) {
+      tenantId = "default";
+    }
+    tenantService.getTenantById(tenantId); // Validate tenant exists
+
     User user = new User();
     user.setUsername(userRequest.getUsername());
     user.setEmail(userRequest.getEmail());

@@ -9,10 +9,10 @@ import com.Instagram.Dummy.repo.UserRepository;
 import com.Instagram.Dummy.utils.AuthenticatedUserUtil;
 import java.util.List;
 import java.util.Map;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 @Slf4j
 @Service
 public class FollowService {
@@ -21,7 +21,7 @@ public class FollowService {
   private final UserRepository userRepository;
   private final AuthenticatedUserUtil authUtil;
 
-    public FollowService(
+  public FollowService(
       FollowRepository followRepository,
       UserRepository userRepository,
       AuthenticatedUserUtil authUtil,
@@ -29,7 +29,7 @@ public class FollowService {
     this.followRepository = followRepository;
     this.userRepository = userRepository;
     this.authUtil = authUtil;
-    }
+  }
 
   @Transactional
   public void followUser(Long targetUserId) {

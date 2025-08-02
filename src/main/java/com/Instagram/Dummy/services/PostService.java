@@ -40,8 +40,8 @@ public class PostService {
 
   public List<PostDTO> getPostsByUser(Long userId) {
     return postRepository.findByUserId(userId).stream()
-            .map(post -> postMapper.toDto(post, likeRepository.countByPostId(post.getId())))
-            .collect(Collectors.toList());
+        .map(post -> postMapper.toDto(post, likeRepository.countByPostId(post.getId())))
+        .collect(Collectors.toList());
   }
 
   public List<PostDTO> getFeedPosts() {
@@ -51,8 +51,8 @@ public class PostService {
     log.info("Fetching posts for feed. User ID: {}, Post owners: {}", userId, userIds);
 
     return postRepository.findByUserIdIn(userIds).stream()
-            .map(post -> postMapper.toDto(post, likeRepository.countByPostId(post.getId())))
-            .collect(Collectors.toList());
+        .map(post -> postMapper.toDto(post, likeRepository.countByPostId(post.getId())))
+        .collect(Collectors.toList());
   }
 
   private boolean isValidInput(String imageUrl, MultipartFile file) {
@@ -68,7 +68,7 @@ public class PostService {
     } else if (file != null && !file.isEmpty()) {
       try {
         String savedPath =
-                ImageUtils.saveImageToLocal(file, user.getId()); // e.g., "/images/user_5/photo.jpg"
+            ImageUtils.saveImageToLocal(file, user.getId()); // e.g., "/images/user_5/photo.jpg"
         builder.sourceType("FILE");
         builder.imageUrl(savedPath);
       } catch (IOException e) {
@@ -87,7 +87,7 @@ public class PostService {
     List<Long> followingIds = followService.getFollowedUserIdsIncludingSelf(userId);
 
     return postRepository.findByUserIdIn(followingIds).stream()
-            .map(post -> postMapper.toDto(post, likeRepository.countByPostId(post.getId())))
-            .collect(Collectors.toList());
+        .map(post -> postMapper.toDto(post, likeRepository.countByPostId(post.getId())))
+        .collect(Collectors.toList());
   }
 }

@@ -33,6 +33,9 @@ public class User {
 
   private String bio;
 
+  @Column(name = "tenant_id", nullable = false)
+  private String tenantId;
+
   @OneToMany(mappedBy = "user")
   @JsonManagedReference
   @ToString.Exclude
