@@ -12,6 +12,11 @@ version = '0.0.1-SNAPSHOT'
 application {
     mainClass = 'com.Instagram.Dummy.DummyApplication'  // Replace with actual main class if different
 }
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
 
 java {
     toolchain {

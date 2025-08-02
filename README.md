@@ -58,7 +58,7 @@ spring:
 Run this command to apply database migrations:
 
 ```bash
-./gradlew flywayMigrate
+  ./gradlew flywayMigrate
 ```
 
 - Locations: `classpath:db/migration`
@@ -112,7 +112,7 @@ export DB_URL="jdbc:mysql://localhost:3306/DummyInsta?serverTimezone=UTC"
 export DB_USERNAME="root"
 export DB_PASSWORD="your-secure-password"
 # Add HIKARI_* vars as needed
-./gradlew bootRun
+  ./gradlew bootRun
 ```
 
 - **Docker/Deployment:** Use `ENV` in Dockerfile or `environment` in `docker-compose.yml`.
