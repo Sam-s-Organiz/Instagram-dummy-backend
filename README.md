@@ -190,3 +190,14 @@ You can run the application using your IDE or with Gradle:
 - Make sure your MySQL server is running.
 - Update `application.yml` for DB and Kafka config as needed.
 - Use Postman or any REST
+
+
+
+## keycloak docker image :
+```bash
+    docker run -d -p 8080:8080 \
+    -e KC_BOOTSTRAP_ADMIN_USERNAME=admin \
+    -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
+    --name keycloak \
+    quay.io/keycloak/keycloak:26.3.2 start-dev
+```

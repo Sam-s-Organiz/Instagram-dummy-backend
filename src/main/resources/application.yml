@@ -51,6 +51,12 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${keycloak.auth-server-url}/realms/${keycloak.realm}
+
 # Logging levels
 logging:
   level:
@@ -58,6 +64,10 @@ logging:
     org.springframework: DEBUG
     org.springframework.cache: DEBUG
 
-# Keycloak base URL
-#keycloak:
-#  auth-server-url: http://localhost:8080/auth
+# Keycloak configuration
+keycloak:
+  auth-server-url: http://localhost:8080  # Keycloak's URL
+  realm: instagram-dummy
+  resource: dummy-client  # Client ID from Step 3
+  credentials:
+    secret: [paste the client secret here]  # Replace with your actual client secret
