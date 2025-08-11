@@ -22,15 +22,21 @@ public class UserController {
   @Autowired private UserService userService;
 
   @PostMapping("/register")
-  public ResponseEntity<User> signUp(@RequestBody UserRequest userRequest) {
-    logger.info("SignUp request received: {}", userRequest);
-    return userService.createUser(userRequest);
+  public ResponseEntity<User> signUp(
+      @Valid @RequestBody UserRequest userRequest,
+      @RequestHeader(name = "X-Tenant-Id", required = true) String tenantId) {
+
+    logger.info("SignUp request received: {} with tenantId: {}", userRequest, tenantId);
+    return userService.createUser(userRequest, tenantId); // Assuming service accepts tenantId
   }
 
   @PostMapping("/login")
-  public UserDto signIn(@RequestBody UserRequest userRequest) {
-    logger.info("SignIn request received: {}", userRequest);
-    return userService.login(userRequest);
+  public UserDto signIn(
+      @RequestBody UserRequest userRequest,
+      @RequestHeader(name = "X-Tenant-Id", required = true) String tenantId) {
+
+    logger.info("SignIn request received: {} with tenantId: {}", userRequest, tenantId);
+    return userService.login(userRequest, tenantId); // Assuming service accepts tenantId
   }
 
   @PatchMapping("/profilepic")

@@ -36,13 +36,9 @@ public class UserService {
   @Autowired private UserMapper userMapper;
   @Autowired private TenantService tenantService;
 
-  public ResponseEntity<User> createUser(UserRequest userRequest) {
+  public ResponseEntity<User> createUser(UserRequest userRequest, String tenantId) {
     System.out.println("Register UserRequest: " + userRequest);
-    String tenantId = userRequest.getTenantId();
-    if (tenantId == null) {
-      tenantId = "default";
-    }
-    tenantService.getTenantById(tenantId); // Validate tenant exists
+    validateAndGetTenantId(tenantId);
 
     User user = new User();
     user.setUsername(userRequest.getUsername());
@@ -54,7 +50,8 @@ public class UserService {
     return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
   }
 
-  public UserDto login(UserRequest userRequest) {
+  public UserDto login(UserRequest userRequest, String tenantId) {
+    validateAndGetTenantId(tenantId);
     Authentication authentication =
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
@@ -111,5 +108,14 @@ public class UserService {
     return userRepository
         .findByEmail(email)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+  }
+
+  private String validateAndGetTenantId(String tenantId) {
+    if (tenantId == null) {
+      tenantId = "default";
+    }
+    // Assuming getTenantById throws ResponseStatusException if tenant doesn't exist
+    tenantService.getTenantById(tenantId);
+    return tenantId;
   }
 }

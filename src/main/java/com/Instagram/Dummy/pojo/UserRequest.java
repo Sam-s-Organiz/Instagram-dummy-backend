@@ -48,16 +48,6 @@ public class UserRequest {
     this.bio = bio;
   }
 
-  private String tenantId;
-
-  public String getTenantId() {
-    return tenantId;
-  }
-
-  public void setTenantId(String tenantId) {
-    this.tenantId = tenantId;
-  }
-
   @Override
   public String toString() {
     return "UserRequest{"
