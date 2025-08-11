@@ -1,0 +1,57 @@
+digraph ProjectFlow {
+    rankdir=LR;
+    node [shape=box, style=filled, fillcolor=lightblue];
+
+    // Entry points (User interacting with APIs)
+    User [label="User", shape=ellipse, fillcolor=lightgreen];
+
+    // API Endpoints grouped by controller
+    FollowUserController_Endpoints [label="/api/follow/{targetUserId} (POST/DELETE)\n/api/follow/counts/{userId} (GET)", fillcolor=lightyellow];
+    ImageController_Endpoints [label="/api/images/user_{userId}/{filename} (GET)", fillcolor=lightyellow];
+    LikeController_Endpoints [label="/api/like/post/{postId} (PUT)\n/api/like/allLikes (GET)", fillcolor=lightyellow];
+    PostController_Endpoints [label="/api/posts/upload (POST)\n/api/posts/user/{userId} (GET)\n/api/posts/followed (GET)\n/api/posts/user/feeds (GET)", fillcolor=lightyellow];
+    UserController_Endpoints [label="/api/user/register (POST)\n/api/user/login (POST)\n/api/user/{id} (GET)\n/api/user/search (POST)", fillcolor=lightyellow];
+
+    // Controllers
+    FollowUserController;
+    ImageController;
+    LikeController;
+    PostController;
+    UserController;
+
+    // Services (from your grep and structure)
+    FollowService;
+    LikeService;
+    PostService;
+    UserService;
+    TenantService;
+    JWTservice [label="JWTservice (to be migrated to Keycloak)"];
+
+    // Infrastructure & external
+    Keycloak [shape=box, fillcolor=plum1, label="Keycloak Service"];
+    DB [label="MySQL DB\n(UserRepository, PostRepository, etc.)", shape=cylinder, fillcolor=lightyellow];
+    Redis [label="Redis Cache", shape=box, fillcolor=orange];
+    Kafka [label="Kafka Broker", shape=box, fillcolor=khaki];
+
+    // Flows: User to Endpoints to Controllers to Services
+    User -> FollowUserController_Endpoints -> FollowUserController -> FollowService -> DB;
+    User -> ImageController_Endpoints -> ImageController;
+    User -> LikeController_Endpoints -> LikeController -> LikeService -> DB;
+    User -> PostController_Endpoints -> PostController -> PostService -> DB;
+    User -> UserController_Endpoints -> UserController -> UserService -> DB;
+
+    // Auth and tenant validation flows
+    UserService -> TenantService [label="Validate Tenant"];
+    UserService -> JWTservice [label="Generate Token"];
+    JWTservice -> Keycloak [style=dashed, color=blue, label="(Migrated: Call token endpoint)"];
+
+    // Additional connections (e.g., caching, events)
+    PostService -> Kafka [style=dotted, color=darkgreen, label="Feed/Events"];
+    PostService -> Redis [style=dashed, color=orange, label="Cache"];
+    FollowService -> DB [label="Follow table"];
+    LikeService -> DB [label="Likes"];
+
+    // Response flow back to User
+    JWTservice -> UserController [label="Response with Token"];
+    UserController -> User [label="Login/Registration Response", style=dotted];
+}
